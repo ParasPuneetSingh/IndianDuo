@@ -55,6 +55,30 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class SubscriptionPlan(BaseModel):
+    id: str
+    name: str
+    price: float
+    currency: str = "USD"
+    duration_months: int
+    features: List[str]
+    max_hearts: int
+    unlimited_hearts: bool = False
+    priority_support: bool = False
+    offline_lessons: bool = False
+    advanced_features: bool = False
+    ads_free: bool = False
+
+class UserSubscription(BaseModel):
+    id: str
+    user_id: str
+    plan_id: str
+    status: str  # active, cancelled, expired, trial
+    started_at: datetime
+    expires_at: Optional[datetime] = None
+    auto_renew: bool = True
+    payment_method: str = "card"
+
 class User(BaseModel):
     id: str
     username: str
@@ -71,6 +95,8 @@ class User(BaseModel):
     gems: int = 0
     friends: List[str] = []
     achievements: List[str] = []
+    subscription_status: str = "free"  # free, premium, family
+    subscription_expires: Optional[datetime] = None
 
 class Language(BaseModel):
     id: str
