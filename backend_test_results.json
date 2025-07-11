@@ -1,0 +1,52 @@
+{
+  "total_tests": 6,
+  "passed": 3,
+  "failed": 3,
+  "results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "Backend is healthy",
+      "response_data": {
+        "status": "healthy",
+        "timestamp": "2025-07-11T11:30:58.403983"
+      },
+      "timestamp": "2025-07-11T11:30:58.405135"
+    },
+    {
+      "test": "Languages Endpoint",
+      "success": false,
+      "message": "HTTP 500: Internal Server Error",
+      "response_data": null,
+      "timestamp": "2025-07-11T11:30:58.910495"
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "message": "User registered successfully. Token type: bearer",
+      "response_data": null,
+      "timestamp": "2025-07-11T11:30:59.798711"
+    },
+    {
+      "test": "User Login",
+      "success": true,
+      "message": "Login successful",
+      "response_data": null,
+      "timestamp": "2025-07-11T11:31:00.599584"
+    },
+    {
+      "test": "Protected Profile",
+      "success": false,
+      "message": "HTTP 500: Internal Server Error",
+      "response_data": null,
+      "timestamp": "2025-07-11T11:31:01.107990"
+    },
+    {
+      "test": "Lesson Completion",
+      "success": false,
+      "message": "HTTP 500: Internal Server Error",
+      "response_data": null,
+      "timestamp": "2025-07-11T11:31:01.637779"
+    }
+  ]
+}
