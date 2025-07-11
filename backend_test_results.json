@@ -1,7 +1,7 @@
 {
   "total_tests": 6,
-  "passed": 3,
-  "failed": 3,
+  "passed": 6,
+  "failed": 0,
   "results": [
     {
       "test": "Health Check",
@@ -9,44 +9,44 @@
       "message": "Backend is healthy",
       "response_data": {
         "status": "healthy",
-        "timestamp": "2025-07-11T11:30:58.403983"
+        "timestamp": "2025-07-11T11:32:06.093073"
       },
-      "timestamp": "2025-07-11T11:30:58.405135"
+      "timestamp": "2025-07-11T11:32:06.094569"
     },
     {
       "test": "Languages Endpoint",
-      "success": false,
-      "message": "HTTP 500: Internal Server Error",
+      "success": true,
+      "message": "Found 10 languages including: Hindi, Tamil, Telugu, Bengali, Kannada, Marathi",
       "response_data": null,
-      "timestamp": "2025-07-11T11:30:58.910495"
+      "timestamp": "2025-07-11T11:32:06.599941"
     },
     {
       "test": "User Registration",
       "success": true,
-      "message": "User registered successfully. Token type: bearer",
+      "message": "User registered with modified credentials",
       "response_data": null,
-      "timestamp": "2025-07-11T11:30:59.798711"
+      "timestamp": "2025-07-11T11:32:07.468171"
     },
     {
       "test": "User Login",
       "success": true,
       "message": "Login successful",
       "response_data": null,
-      "timestamp": "2025-07-11T11:31:00.599584"
+      "timestamp": "2025-07-11T11:32:08.360519"
     },
     {
       "test": "Protected Profile",
-      "success": false,
-      "message": "HTTP 500: Internal Server Error",
+      "success": true,
+      "message": "Profile retrieved successfully for user: priya_sharma",
       "response_data": null,
-      "timestamp": "2025-07-11T11:31:01.107990"
+      "timestamp": "2025-07-11T11:32:08.864807"
     },
     {
       "test": "Lesson Completion",
-      "success": false,
-      "message": "HTTP 500: Internal Server Error",
+      "success": true,
+      "message": "Lesson completion recorded: Lesson completed successfully",
       "response_data": null,
-      "timestamp": "2025-07-11T11:31:01.637779"
+      "timestamp": "2025-07-11T11:32:09.370833"
     }
   ]
 }
