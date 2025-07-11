@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Learn from './pages/Learn';
 import Profile from './pages/Profile';
+import Subscription from './pages/Subscription';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -23,6 +24,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/subscription" element={<Subscription />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
