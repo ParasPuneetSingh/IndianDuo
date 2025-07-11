@@ -238,6 +238,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
     user_data = current_user.copy()
     user_data.pop("password", None)
+    # Convert ObjectId to string for JSON serialization
+    if '_id' in user_data:
+        user_data['_id'] = str(user_data['_id'])
     return user_data
 
 @app.get("/api/languages")
