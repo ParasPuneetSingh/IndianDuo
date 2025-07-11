@@ -177,6 +177,77 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
+# Initialize subscription plans
+async def init_subscription_plans():
+    plans = [
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Free",
+            "price": 0.0,
+            "currency": "USD",
+            "duration_months": 0,
+            "features": [
+                "5 hearts per day",
+                "Basic lessons",
+                "Progress tracking",
+                "Streak counter"
+            ],
+            "max_hearts": 5,
+            "unlimited_hearts": False,
+            "priority_support": False,
+            "offline_lessons": False,
+            "advanced_features": False,
+            "ads_free": False
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "IndianDuo Plus",
+            "price": 6.99,
+            "currency": "USD",
+            "duration_months": 1,
+            "features": [
+                "Unlimited hearts",
+                "No ads",
+                "Offline lessons",
+                "Progress tracking",
+                "Streak counter",
+                "Priority support",
+                "Advanced practice"
+            ],
+            "max_hearts": 999,
+            "unlimited_hearts": True,
+            "priority_support": True,
+            "offline_lessons": True,
+            "advanced_features": True,
+            "ads_free": True
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Family Plan",
+            "price": 9.99,
+            "currency": "USD",
+            "duration_months": 1,
+            "features": [
+                "Everything in Plus",
+                "Up to 6 family members",
+                "Family progress tracking",
+                "Parental controls",
+                "Shared achievements"
+            ],
+            "max_hearts": 999,
+            "unlimited_hearts": True,
+            "priority_support": True,
+            "offline_lessons": True,
+            "advanced_features": True,
+            "ads_free": True
+        }
+    ]
+    
+    for plan in plans:
+        existing = await db.subscription_plans.find_one({"name": plan["name"]})
+        if not existing:
+            await db.subscription_plans.insert_one(plan)
+
 # Initialize languages
 async def init_languages():
     languages = [
