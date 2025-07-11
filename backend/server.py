@@ -301,7 +301,9 @@ async def register(user: UserCreate):
         "hearts": 5,
         "gems": 0,
         "friends": [],
-        "achievements": []
+        "achievements": [],
+        "subscription_status": "free",
+        "subscription_expires": None
     }
     
     await db.users.insert_one(user_data)
