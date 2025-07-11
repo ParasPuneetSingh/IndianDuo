@@ -414,8 +414,158 @@ async def complete_lesson(lesson_id: str, score: int, current_user: dict = Depen
     
     return {"message": "Lesson completed successfully", "xp_gained": xp_gained}
 
+@app.get("/api/subscription/plans")
+async def get_subscription_plans():
+    """Get all available subscription plans"""
+    plans = await db.subscription_plans.find({}).to_list(None)
+    # Convert ObjectId to string for JSON serialization
+    for plan in plans:
+        if '_id' in plan:
+            plan['_id'] = str(plan['_id'])
+    return plans
+
+@app.get("/api/subscription/current")
+async def get_current_subscription(current_user: dict = Depends(get_current_user)):
+    """Get current user's subscription details"""
+    user_id = current_user["id"]
+    
+    # Get user's subscription
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id, "status": "active"})
+    
+    if not subscription:
+        # Return free plan details
+        free_plan = await db.subscription_plans.find_one({"name": "Free"})
+        if free_plan and '_id' in free_plan:
+            free_plan['_id'] = str(free_plan['_id'])
+        return {
+            "plan": free_plan,
+            "subscription": None,
+            "status": "free"
+        }
+    
+    # Get plan details
+    plan = await db.subscription_plans.find_one({"id": subscription["plan_id"]})
+    
+    # Convert ObjectId to string for JSON serialization
+    if subscription and '_id' in subscription:
+        subscription['_id'] = str(subscription['_id'])
+    if plan and '_id' in plan:
+        plan['_id'] = str(plan['_id'])
+    
+    return {
+        "plan": plan,
+        "subscription": subscription,
+        "status": subscription["status"]
+    }
+
+@app.post("/api/subscription/subscribe")
+async def subscribe_to_plan(plan_id: str, current_user: dict = Depends(get_current_user)):
+    """Subscribe user to a plan (mock payment processing)"""
+    user_id = current_user["id"]
+    
+    # Get plan details
+    plan = await db.subscription_plans.find_one({"id": plan_id})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    
+    # Check if user already has an active subscription
+    existing_subscription = await db.user_subscriptions.find_one({"user_id": user_id, "status": "active"})
+    if existing_subscription:
+        raise HTTPException(status_code=400, detail="User already has an active subscription")
+    
+    # For free plan, don't create subscription record
+    if plan["name"] == "Free":
+        return {"message": "Already on free plan"}
+    
+    # Create subscription record
+    subscription_data = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "plan_id": plan_id,
+        "status": "active",
+        "started_at": datetime.utcnow(),
+        "expires_at": datetime.utcnow() + timedelta(days=30 * plan["duration_months"]),
+        "auto_renew": True,
+        "payment_method": "card"
+    }
+    
+    await db.user_subscriptions.insert_one(subscription_data)
+    
+    # Update user subscription status
+    subscription_status = "premium" if plan["name"] == "IndianDuo Plus" else "family"
+    await db.users.update_one(
+        {"id": user_id},
+        {
+            "$set": {
+                "subscription_status": subscription_status,
+                "subscription_expires": subscription_data["expires_at"],
+                "hearts": plan["max_hearts"] if plan["unlimited_hearts"] else 5
+            }
+        }
+    )
+    
+    return {"message": "Subscription successful", "subscription": subscription_data}
+
+@app.post("/api/subscription/cancel")
+async def cancel_subscription(current_user: dict = Depends(get_current_user)):
+    """Cancel user's subscription"""
+    user_id = current_user["id"]
+    
+    # Find active subscription
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id, "status": "active"})
+    if not subscription:
+        raise HTTPException(status_code=404, detail="No active subscription found")
+    
+    # Update subscription status
+    await db.user_subscriptions.update_one(
+        {"id": subscription["id"]},
+        {"$set": {"status": "cancelled", "auto_renew": False}}
+    )
+    
+    # Update user status (will revert to free at expiration)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"subscription_status": "free", "hearts": 5}}
+    )
+    
+    return {"message": "Subscription cancelled successfully"}
+
+@app.get("/api/user/hearts")
+async def get_user_hearts(current_user: dict = Depends(get_current_user)):
+    """Get user's current hearts count"""
+    return {"hearts": current_user.get("hearts", 5)}
+
+@app.post("/api/user/hearts/refill")
+async def refill_hearts(current_user: dict = Depends(get_current_user)):
+    """Refill hearts (premium feature or with gems)"""
+    user_id = current_user["id"]
+    user_subscription = current_user.get("subscription_status", "free")
+    
+    if user_subscription in ["premium", "family"]:
+        # Premium users get unlimited hearts
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"hearts": 999}}
+        )
+        return {"message": "Hearts refilled (Premium)", "hearts": 999}
+    else:
+        # Free users can use gems to refill
+        user_gems = current_user.get("gems", 0)
+        if user_gems >= 350:  # Cost to refill hearts
+            await db.users.update_one(
+                {"id": user_id},
+                {
+                    "$set": {"hearts": 5},
+                    "$inc": {"gems": -350}
+                }
+            )
+            return {"message": "Hearts refilled with gems", "hearts": 5, "gems_spent": 350}
+        else:
+            raise HTTPException(status_code=400, detail="Not enough gems to refill hearts")
+
 @app.on_event("startup")
 async def startup_event():
+    await init_subscription_plans()
     await init_languages()
 
 if __name__ == "__main__":
