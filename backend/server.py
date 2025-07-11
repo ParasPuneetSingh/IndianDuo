@@ -260,6 +260,7 @@ async def get_lessons(language_id: str, current_user: dict = Depends(get_current
 @app.post("/api/lessons/{lesson_id}/complete")
 async def complete_lesson(lesson_id: str, score: int, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
+    xp_gained = 10  # Default XP value
     
     # Update user progress
     progress_data = {
