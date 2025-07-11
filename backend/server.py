@@ -243,6 +243,10 @@ async def get_user_profile(current_user: dict = Depends(get_current_user)):
 @app.get("/api/languages")
 async def get_languages():
     languages = await db.languages.find({}).to_list(None)
+    # Convert ObjectId to string for JSON serialization
+    for lang in languages:
+        if '_id' in lang:
+            lang['_id'] = str(lang['_id'])
     return languages
 
 @app.get("/api/lessons/{language_id}")
